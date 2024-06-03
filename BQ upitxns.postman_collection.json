@@ -1,0 +1,171 @@
+{
+	"info": {
+		"_postman_id": "77b8bce9-426c-413b-bf6f-4c8780b1c735",
+		"name": "BQ upitxns",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28252148",
+		"_collection_link": "https://lunar-sunset-191509.postman.co/workspace/My-Workspace~77725c7d-ee39-4744-830e-9cbf0c6e4783/collection/28252148-77b8bce9-426c-413b-bf6f-4c8780b1c735?action=share&source=collection_link&creator=28252148"
+	},
+	"item": [
+		{
+			"name": "CognitoTokenB2C",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic MmpxaTc2NjZuZGc5cmk1OWJjaG03Yjg1Nm06bHJ1cmYxam9wYzU2YjI0c3FzZm85Z20yOGk3NW1ta3RkZWI2cXFrM2QyN3FnNTAxYTh1"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": []
+				},
+				"url": {
+					"raw": "https://abfss-uat-api.auth.ap-south-1.amazoncognito.com/oauth2/token?client_id=2jqi7666ndg9ri59bchm7b856m&scope=auth/b2c&grant_type=client_credentials",
+					"protocol": "https",
+					"host": [
+						"abfss-uat-api",
+						"auth",
+						"ap-south-1",
+						"amazoncognito",
+						"com"
+					],
+					"path": [
+						"oauth2",
+						"token"
+					],
+					"query": [
+						{
+							"key": "client_id",
+							"value": "2jqi7666ndg9ri59bchm7b856m"
+						},
+						{
+							"key": "scope",
+							"value": "auth/b2c"
+						},
+						{
+							"key": "grant_type",
+							"value": "client_credentials"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "upitxns",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "auth-token",
+						"value": "eyJraWQiOiJHY3llWkhabnJQNHNuWm1ubHdiSWRQdEh0UzBxSmxneSs4YTdDNG5pTGVJPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiIyanFpNzY2Nm5kZzlyaTU5YmNobTdiODU2bSIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXV0aFwvYjJjIiwiYXV0aF90aW1lIjoxNzE2NTUzMDY2LCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtc291dGgtMS5hbWF6b25hd3MuY29tXC9hcC1zb3V0aC0xXzBIOHR4Qm9YVSIsImV4cCI6MTcxNjU1NjY2NiwiaWF0IjoxNzE2NTUzMDY2LCJ2ZXJzaW9uIjoyLCJqdGkiOiJlNGUzMmFiNC1kMTgyLTQyMzAtODU5MC1lMjdiODUxZDM2OWMiLCJjbGllbnRfaWQiOiIyanFpNzY2Nm5kZzlyaTU5YmNobTdiODU2bSJ9.WANtyFOl4clpt-ZSdIqO6QbPOUUtKUDrlk2rSTcPIctKhXW6d_hL-fpcWbJh6ZnlXCzphfNdFfGF67-K6ge9J7VSAtuTJgJI6doW3LxRqhdZRuhwl7nAARrWoBXj4ZjpFkXrV1Dd2DKionGVW0QRxaRWPlRGVja4snK7KkfeBRTGiH6G2k3YLo8XtMGX_UjpmQ4jHH0ciLZDcS-we_GIAviMO-W5PEHsQs8V5IqOKROAIJb02HHTGZXbHzXUJjPTVanlJZHq_UtYAbXQ42rM0D118HH2UDFdKge7SydNMKw9d-fG3YTgEE3lBCJOHOGJK6077NHys5ZP86EFVIaifQ"
+					}
+				],
+				"url": {
+					"raw": "https://api.abcscuat.com/BQ/upitxns",
+					"protocol": "https",
+					"host": [
+						"api",
+						"abcscuat",
+						"com"
+					],
+					"path": [
+						"BQ",
+						"upitxns"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "upitxns",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "auth-token",
+								"value": "eyJraWQiOiJHY3llWkhabnJQNHNuWm1ubHdiSWRQdEh0UzBxSmxneSs4YTdDNG5pTGVJPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiIyanFpNzY2Nm5kZzlyaTU5YmNobTdiODU2bSIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXV0aFwvYjJjIiwiYXV0aF90aW1lIjoxNzE2NTU0NTM4LCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtc291dGgtMS5hbWF6b25hd3MuY29tXC9hcC1zb3V0aC0xXzBIOHR4Qm9YVSIsImV4cCI6MTcxNjU1ODEzOCwiaWF0IjoxNzE2NTU0NTM4LCJ2ZXJzaW9uIjoyLCJqdGkiOiIyYWYyMDdkZC0zNzkzLTQ0ZTQtOGUyZi0xNjRiNGVkMzc3NjgiLCJjbGllbnRfaWQiOiIyanFpNzY2Nm5kZzlyaTU5YmNobTdiODU2bSJ9.AmsWps1e6j02d8BD_HRbjqOThePrzKciZfOyOZxSfOhAoCylYWV8wzDD5PZLv9fQNkRnkmpeJh7qafda5T61t-k5si00HwS6sWzh7pNprd2ci2f4kGu4CrG07zEcHVzUAUttNRO7B-TIzfomAFu4pp-jMX7NNO9xR-HrUJHpqYH0bb1OFJS17_cPgL3Rw2BpCZmPoVK5wNc6_yjfo5nSr_cr2Nzsi162UnxWl3ytCNJ-NqbRPt3aHfgiMuFo1uP2ViJf-DdK_mee_ZcXO0Qg1AMpnH0risyhl3G0wo7byqNwWAJYP_XR1ocdwDHVGb5YXWHoFqA8-l8CGg_3Ea_jtA"
+							}
+						],
+						"url": {
+							"raw": "https://api.abcscuat.com/BQ/upitxns",
+							"protocol": "https",
+							"host": [
+								"api",
+								"abcscuat",
+								"com"
+							],
+							"path": [
+								"BQ",
+								"upitxns"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Fri, 24 May 2024 12:42:42 GMT"
+						},
+						{
+							"key": "Server",
+							"value": "IF_WAF"
+						},
+						{
+							"key": "AppTrana-Request-ID",
+							"value": "ZlCLPT6YoXoNgbVp1MIKIAAAALE"
+						},
+						{
+							"key": "boost-set",
+							"value": "(null)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "476"
+						},
+						{
+							"key": "x-amzn-RequestId",
+							"value": "bc45fef6-53d9-4d64-86e0-0e0e9d15b3b1"
+						},
+						{
+							"key": "x-amz-apigw-id",
+							"value": "YRqxqEgvBcwFmZQ="
+						},
+						{
+							"key": "X-Amzn-Trace-Id",
+							"value": "Root=1-66508b3d-0d20ab292fb4e99209add9b0"
+						},
+						{
+							"key": "X-MP-XAE2",
+							"value": "18911"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5, max=60"
+						},
+						{
+							"key": "Connection",
+							"value": "Keep-Alive"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"DTE\": \"Fri, 17 May 2024 00:00:00 GMT\",\n        \"GMV\": \"1570752\",\n        \"Txns\": 9010\n    },\n    {\n        \"DTE\": \"Sat, 18 May 2024 00:00:00 GMT\",\n        \"GMV\": \"2013953\",\n        \"Txns\": 17720\n    },\n    {\n        \"DTE\": \"Wed, 22 May 2024 00:00:00 GMT\",\n        \"GMV\": \"840026\",\n        \"Txns\": 3804\n    },\n    {\n        \"DTE\": \"Mon, 20 May 2024 00:00:00 GMT\",\n        \"GMV\": \"1059527\",\n        \"Txns\": 8138\n    },\n    {\n        \"DTE\": \"Thu, 23 May 2024 00:00:00 GMT\",\n        \"GMV\": \"187208\",\n        \"Txns\": 612\n    },\n    {\n        \"DTE\": \"Sun, 19 May 2024 00:00:00 GMT\",\n        \"GMV\": \"1623830\",\n        \"Txns\": 11560\n    },\n    {\n        \"DTE\": \"Tue, 21 May 2024 00:00:00 GMT\",\n        \"GMV\": \"941825\",\n        \"Txns\": 5836\n    }\n]"
+				}
+			]
+		}
+	]
+}
