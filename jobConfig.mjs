@@ -4,14 +4,14 @@ export default [
     {
       index: 1,
       nameOfReport: 'XYZ',
-      dbQueryApiName: 'getXYZAPIData',
+      dbQueryApiName: 'upitxns',
       jobTimes: '10:00',
       durationInMins: null,
     },
     {
       index: 2,
       nameOfReport: 'ABC',
-      dbQueryApiName: 'getABCAPIData',
+      dbQueryApiName: 'upitxns',
       jobTimes: '11:00',
       durationInMins: 10,
     },
