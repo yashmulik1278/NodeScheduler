@@ -30,7 +30,7 @@ async function getCognitoToken() {
 
 async function fetchData(apiName) {
   const accessToken = await getCognitoToken();
-  const url = `${process.env.ABCSCUAT_API_URL}${apiName}`;
+  const url = `${process.env.ABCSCUAT_API_URL}/${apiName}`;
   const headers = {
     'Authorization': `Bearer ${accessToken}`,
   };
