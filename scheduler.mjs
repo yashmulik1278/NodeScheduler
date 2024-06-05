@@ -25,7 +25,7 @@ async function getCognitoToken() {
     'Content-Type': 'application/x-www-form-urlencoded'
   };
   try {
-    const response = await axios.post(process.env.COGNITO_TOKEN_URL,  { headers });
+    const response = await axios.post(process.env.COGNITO_TOKEN_URL, null, { headers });
     logger.info(`CognitoTokenB2C API called. Status code: ${response.status}. Response: ${JSON.stringify(response.data)}`);
     return response.data.access_token;
   } catch (error) {
@@ -70,7 +70,8 @@ async function createPdf(reportName, data) {
   const cellPadding = 5;
   const cellHeight = fontSize + cellPadding * 2;
 
-  const headers = Object.keys(data[0]).map(header => capitalizeFirstLetter(header)); // Capitalize first letter
+  const headers = Object.keys(data[0])
+  const capitalizedHeaders = Object.keys(data[0]).map(header => capitalizeFirstLetter(header)); // Capitalize first letter
 
   // Draw report name as heading
   page.drawText(reportName, {
@@ -87,7 +88,7 @@ async function createPdf(reportName, data) {
   let y = tableTop - fontSize - 20; // Start below the heading
 
   // Draw table headers
-  headers.forEach((header, i) => {
+  capitalizedHeaders.forEach((header, i) => {
     // Draw header background
     page.drawRectangle({
       x: margin + i * cellWidth,
@@ -123,7 +124,7 @@ async function createPdf(reportName, data) {
   data.forEach(row => {
     headers.forEach((header, i) => {
       // Draw cell text
-      page.drawText(row[header.toLowerCase()].toString(), {
+      page.drawText(row[header].toString(), {
         x: margin + i * cellWidth + cellPadding,
         y: y - cellPadding - fontSize,
         size: fontSize
@@ -222,9 +223,9 @@ async function sendWhatsAppMessage(groupId, message, pdfPath, mediaUrl, retries 
 }
 
 // Function to process data and send a WhatsApp message
-async function processData(groupId, apiName ,reportName) {
+async function processData(groupId, apiName, reportName) {
   try {
-    const data = await fetchData(apiName); 
+    const data = await fetchData(apiName);
 
     // Check if the data should be sent as text or PDF
     if (data.length < 4 && Object.keys(data[0]).length < 2) {
@@ -251,7 +252,7 @@ async function processData(groupId, apiName ,reportName) {
 // Function to execute the job task
 async function jobTask(groupId, apiName, reportName) {
   try {
-    await processData(groupId, reportName);
+    await processData(groupId, apiName, reportName);
   } catch (error) {
     logger.error(`Error in job task for API ${apiName} and group ${groupId}: ${error.message}`);
   }
