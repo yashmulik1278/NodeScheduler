@@ -1,15 +1,13 @@
-// main.js
-
 import 'dotenv/config';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import axios from 'axios';
 import schedule from 'node-schedule';
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import fs from 'fs';
+import csv from 'csv-parser';
 import FormData from 'form-data';
 import logger from './logger.mjs';
-import jobConfig from './jobConfig.mjs';
+import puppeteer from 'puppeteer';
 
 // Utility to get the current file's directory
 const __filename = fileURLToPath(import.meta.url);
@@ -35,7 +33,7 @@ async function getCognitoToken() {
 }
 
 // Function to fetch data from the specified API
-async function fetchData(apiName) {
+async function fetchData(apiName, reportId) {
   const accessToken = await getCognitoToken();
   const url = `${process.env.ABCSCUAT_API_URL}/${apiName}`;
   const headers = {
@@ -43,7 +41,7 @@ async function fetchData(apiName) {
   };
 
   try {
-    const response = await axios.get(url, { headers });
+    const response = await axios.post(url, { report_id: reportId }, { headers });
     logger.info(`DB Query API ${apiName} called. Status Code: ${response.status}. Response: ${JSON.stringify(response.data)}`);
     return response.data;
   } catch (error) {
@@ -55,104 +53,104 @@ async function fetchData(apiName) {
   }
 }
 
-// Function to create a PDF from the data in table format
-async function createPdf(reportName, data) {
-  const pdfDoc = await PDFDocument.create();
-  let page = pdfDoc.addPage();
-  const { width, height } = page.getSize();
-  const fontSize = 12;
+async function saveTableAsJpeg(htmlMarkup) {
+  try {
+    // Launch headless browser
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
 
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  page.setFont(font);
+    // Set content of the page
+    await page.setContent(htmlMarkup);
 
-  const margin = 20;
-  const tableTop = height - margin;
-  const cellPadding = 5;
-  const cellHeight = fontSize + cellPadding * 2;
+    // Select the table
+    const element = await page.$('table');
 
-  const headers = Object.keys(data[0])
-  const capitalizedHeaders = Object.keys(data[0]).map(header => capitalizeFirstLetter(header)); // Capitalize first letter
+    // Take a screenshot of the table
+    const jpegBuffer = await element.screenshot({ type: 'jpeg' });
 
-  // Draw report name as heading
-  page.drawText(reportName, {
-    x: margin,
-    y: tableTop + fontSize + -20, // Positioning below the top margin
-    size: 18,
-    color: rgb(0, 0.545, 0.855), // Salesforce blue color
-    bold: true,
-  });
+    // Save the JPEG file locally
+    const jpegPath = path.join(__dirname, 'table.jpg');
+    fs.writeFileSync(jpegPath, jpegBuffer);
 
-  const numColumns = headers.length;
-  const cellWidth = (width - margin * 2) / numColumns;
+    // Close the browser
+    await browser.close();
 
-  let y = tableTop - fontSize - 20; // Start below the heading
-
-  // Draw table headers
-  capitalizedHeaders.forEach((header, i) => {
-    // Draw header background
-    page.drawRectangle({
-      x: margin + i * cellWidth,
-      y: y - cellHeight,
-      width: cellWidth,
-      height: cellHeight,
-      color: rgb(0, 0.545, 0.855), // Salesforce blue color
-    });
-
-    // Draw header text
-    page.drawText(header, {
-      x: margin + i * cellWidth + cellPadding,
-      y: y - cellPadding - fontSize,
-      size: 14,
-      color: rgb(1, 1, 1), // White color
-      bold: true
-    });
-
-    // Draw header borders
-    page.drawRectangle({
-      x: margin + i * cellWidth,
-      y: y - cellHeight,
-      width: cellWidth,
-      height: cellHeight,
-      borderColor: rgb(0, 0, 0),
-      borderWidth: 1,
-    });
-  });
-
-  y -= cellHeight;
-
-  // Draw table rows
-  data.forEach(row => {
-    headers.forEach((header, i) => {
-      // Draw cell text
-      page.drawText(row[header].toString(), {
-        x: margin + i * cellWidth + cellPadding,
-        y: y - cellPadding - fontSize,
-        size: fontSize
-      });
-      // Draw cell borders
-      page.drawRectangle({
-        x: margin + i * cellWidth,
-        y: y - cellHeight,
-        width: cellWidth,
-        height: cellHeight,
-        borderColor: rgb(0, 0, 0),
-        borderWidth: 1,
-      });
-    });
-    y -= cellHeight;
-    if (y < margin) {
-      page = pdfDoc.addPage();
-      page.setFont(font);
-      y = tableTop;
-    }
-  });
-
-  const pdfBytes = await pdfDoc.save();
-  const pdfPath = path.join(__dirname, 'data.pdf');
-  fs.writeFileSync(pdfPath, pdfBytes);
-
-  return pdfPath;
+    // Return the URL of the saved image
+    return jpegPath;
+  } catch (error) {
+    console.error(error);
+  }
 }
+
+// Function to create a PDF from the data in table format
+function createHtml(reportName, data) {
+  const capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + string.slice(1);
+
+  const headers = Object.keys(data[0]);
+  const capitalizedHeaders = headers.map(header => capitalizeFirstLetter(header));
+
+  // Create the HTML structure
+  let html = `
+    <html>
+      <head>
+        <style>
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 18px;
+            text-align: left;
+          }
+          th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+          }
+          th {
+            background-color: #0070d2;
+            color: white;
+          }
+          h1 {
+            color: #0070d2;
+          }
+        </style>
+      </head>
+      <body>
+        <h1>${reportName}</h1>
+        <table>
+          <thead>
+            <tr>
+  `;
+
+  // Add table headers
+  capitalizedHeaders.forEach(header => {
+    html += `<th>${header}</th>`;
+  });
+
+  html += `
+            </tr>
+          </thead>
+          <tbody>
+  `;
+
+  // Add table rows
+  data.forEach(row => {
+    html += `<tr>`;
+    headers.forEach(header => {
+      html += `<td>${row[header]}</td>`;
+    });
+    html += `</tr>`;
+  });
+
+  html += `
+          </tbody>
+        </table>
+      </body>
+    </html>
+  `;
+
+  return html;
+}
+
 
 // Function to capitalize only the first letter of a string
 function capitalizeFirstLetter(string) {
@@ -176,7 +174,6 @@ async function uploadFileToBagAChat(conversationName, filePath) {
 
     const mediaUrl = response.data.mediaurl;
     logger.info(`File uploaded to Bag A Chat server. Status: ${response.data.status}. Media URL: ${mediaUrl}`);
-    console.log(`Media URL returned: ${mediaUrl}`);
 
     return {
       status: response.data.status,
@@ -223,25 +220,43 @@ async function sendWhatsAppMessage(groupId, message, pdfPath, mediaUrl, retries 
 }
 
 // Function to process data and send a WhatsApp message
-async function processData(groupId, apiName, reportName) {
+async function processData(groupId, apiName, reportName, reportId) {
   try {
-    const data = await fetchData(apiName);
+    const { data, message: title } = await fetchData(apiName, reportId);
+
+    // const { data, message:title } = {
+    //   message: "Please find the Daily Txns data below ",
+    //   data: [
+    //     {
+    //       "RPL Leads Report": "MTD-1000 LMTD 20000 %Change %20 BTD 10000"
+    //     },
+    //     {
+    //       "RPL Leads Report": "MTD-1001 LMTD 20000 %Change %20 BTD 10000"
+    //     },
+    //     {
+    //       "RPL Leads Report": "MTD-1002 LMTD 20000 %Change %20 BTD 10000"
+    //     }
+    //   ]
+    // }
 
     // Check if the data should be sent as text or PDF
     if (data.length < 4 && Object.keys(data[0]).length < 2) {
       // Convert data to text message
-      const message = data.map(row => Object.values(row).join(', ')).join('\n');
+      let message = data.map(row => Object.values(row).join(', ')).join('\n');
+      message = `---\n ${title} \n *${reportName}* \n ${message} \n---`
       await sendWhatsAppMessage(groupId, message, '', '');
     } else {
       // Create PDF from data
-      const pdfFilePath = await createPdf(reportName, data);
-      const uploadResponse = await uploadFileToBagAChat(groupId, pdfFilePath);
-      const message = `Here is your requested data:`;
+      const htmlMarkup = createHtml(reportName, data);
+      const dataUrl = await saveTableAsJpeg(htmlMarkup);
+      console.log('dataUrl', dataUrl)
+      const uploadResponse = await uploadFileToBagAChat(groupId, dataUrl);
+      console.log('uploadResponse', uploadResponse)
 
       // Extract media URL from upload response
       const mediaUrl = uploadResponse.mediaUrl;
 
-      await sendWhatsAppMessage(groupId, message, pdfFilePath, mediaUrl);
+      await sendWhatsAppMessage(groupId, title, dataUrl, mediaUrl);
     }
   } catch (error) {
     logger.error(`Error processing data for group ${groupId}: ${error.message}`);
@@ -250,9 +265,9 @@ async function processData(groupId, apiName, reportName) {
 }
 
 // Function to execute the job task
-async function jobTask(groupId, apiName, reportName) {
+async function jobTask(groupId, apiName, reportName, reportId) {
   try {
-    await processData(groupId, apiName, reportName);
+    await processData(groupId, apiName, reportName, reportId);
   } catch (error) {
     logger.error(`Error in job task for API ${apiName} and group ${groupId}: ${error.message}`);
   }
@@ -262,23 +277,31 @@ async function jobTask(groupId, apiName, reportName) {
 function scheduleJobs() {
   const now = new Date();
 
-  jobConfig.forEach(job => {
-    const { reportName, apiName, jobTimes, durationInMins, groupId } = job;
-    const [hour, minute] = jobTimes.split(':').map(Number);
-    const jobTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute);
-    const delayMinutes = (now - jobTime) / (1000 * 60);
+  const jobConfig = [];
+  fs.createReadStream('jobConfig.csv')
+    .pipe(csv())
+    .on('data', (data) => jobConfig.push(data))
+    .on('end', () => {
+      console.log(jobConfig);
+      jobConfig.forEach(job => {
+        const { reportName, reportId, apiName, jobTimes, durationInMins, groupId } = job;
+        const [hour, minute] = jobTimes.split(':').map(Number);
+        const jobTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute);
+        const delayMinutes = (now - jobTime) / (1000 * 60);
+    
+        const ignoreFrequency = Number(process.env.JOB_IGNORE_FREQUENCY_MINUTES);
+        const runJobPassed = Number(process.env.RUN_JOB_PASSED_MINUTES);
+    
+        if (durationInMins && durationInMins >= ignoreFrequency) {
+          schedule.scheduleJob(`*/${durationInMins} * * * *`, () => jobTask(groupId, apiName, reportName, reportId));
+        } else if (delayMinutes <= runJobPassed) {
+          jobTask(groupId, apiName, reportName, reportId);
+        } else {
+          schedule.scheduleJob({ hour, minute }, () => jobTask(groupId, apiName, reportName, reportId));
+        }
+      });
+    });
 
-    const ignoreFrequency = Number(process.env.JOB_IGNORE_FREQUENCY_MINUTES);
-    const runJobPassed = Number(process.env.RUN_JOB_PASSED_MINUTES);
-
-    if (durationInMins && durationInMins >= ignoreFrequency) {
-      schedule.scheduleJob(`*/${durationInMins} * * * *`, () => jobTask(groupId, apiName, reportName));
-    } else if (delayMinutes <= runJobPassed) {
-      jobTask(groupId, apiName, reportName);
-    } else {
-      schedule.scheduleJob({ hour, minute }, () => jobTask(groupId, apiName, reportName));
-    }
-  });
 }
 
 // Start job scheduling
